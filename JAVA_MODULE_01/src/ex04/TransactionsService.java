@@ -28,7 +28,8 @@ public class TransactionsService {
 		transaction.setRecipient(recipient);
 		transaction.setCategory(Transaction.Category.OUTCOME);
 		transaction.setAmount(-amount);
-
+		sender.addTransaction(transaction);
+		recipient.addTransaction(flipTransactionCopy(transaction));
 	}
 
 }

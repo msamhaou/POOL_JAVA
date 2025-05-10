@@ -6,25 +6,41 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class Program {
-    public static void Err(){
-        System.err.println("cantProceed");
+    public static void Err(String message){
+        System.err.println(message);
         System.exit(-1);
     }
 
-    public static int getAttendence(Scanner sc, String[] names, int[]    hours, int[]    dates, int[]    status) {
+    public static int packDayAndHour(int hour, int date, int[] september){
+        int DayOfWeekFromSeptember = september[date - 1];
+        int packingDateandHour = hour << 8 | (DayOfWeekFromSeptember & 0xFFFF);
+        return packingDateandHour;
+    }
+    public static int getAttendence(Scanner sc, String[] students, int[] classesOfWeek, int[] september) {
 
         int         counter = 0;
+        String[] names = new String[100];
+        int[] hours = new int[100];
+        int[] dates = new int[100];
+        int[] status = new int[100];
         String      line = sc.nextLine();
+
 
         while (!line.equals(".")){
             String[] spl = split(line,' ');
-            if (spl.length == 0 || spl.length > 4)
-                Err();
+            if (spl.length != 4)
+                Err("Invalid Input 32");
             names[counter] = spl[0];
+            if (!isStudentExist(spl[0], students))
+                Err("Student Dont exist");
 			hours[counter] = _parseInt(spl[1]);
 			dates[counter] = _parseInt((spl[2]));
+            int packInputedClass = packDayAndHour(hours[counter], dates[counter], september);
+            if (!isClassExist(packInputedClass, classesOfWeek))
+                Err("Class Does not Exist");
 			status[counter] = decodeStatus(spl[3]);
 			//Hours (1,6) && name in names && dates in dates
+            line = sc.nextLine();
 			counter++;
         }
 		return counter;
@@ -38,12 +54,12 @@ public class Program {
         while(!line.equals(".") && i < 10){
             studens[i++] = line;
             if(line.isEmpty() || line.length() > 10 || line.contains(" "))
-                Err();
+                Err("Len");
             System.out.print("-> ");
             line = sc.nextLine();
         }
         if (studens[0].isEmpty())
-            Err();
+            Err("Empty");
         return studens;
     }
 
@@ -62,7 +78,7 @@ public class Program {
             }
 
         }
-        System.out.println(delimeterCount);
+//        System.out.println(delimeterCount);
         String[] res = new String[delimeterCount];
         int words = 0;
         for (int i =0 ; i< arr.length; i++){
@@ -87,7 +103,7 @@ public class Program {
 		else if (str.equals("NOT_HERE")) {
 			return -1;
 		}else {
-			Err();
+			Err("Invalid Attendence Input");
 		}
 		return 0;
 	}
@@ -96,7 +112,7 @@ public class Program {
         int value = 0;
         for (int i = 0; i< arr.length; i++){
             if (arr[i] < '0' || arr[i] > '9')
-                Err();
+                Err("Invalid Input: isNotNum");
             value = value * 10 + (arr[i] - '0');
         }
         return value;
@@ -115,18 +131,20 @@ public class Program {
         int[] days = new int[10];
 		int[] results = new int[10];
         int count = 0;
+        System.out.print("-> ");
         String line = sc.nextLine();
         while (!line.equals(".") && count < 10){
             String[] spl = split(line, ' ');//spl < 2
             if (spl.length == 0 || spl.length > 2)
-                Err();
+                Err("Invalid Date Input");
             hours[count] = _parseInt(spl[0]);
             if (hours[count] < 1 || hours[count] > 6 )
-                Err();
+                Err("Invalid Hour");
             days[count] = dayStringToCode(spl[1]);
-            if (days[count] == 0)
-                Err();
+            if (days[count] == -1)
+                Err("Invalid Week Day");
 			results[count] = hours[count] << 8 | (days[count]& 0xFFFF);
+            System.out.print("-> ");
             line = sc.nextLine();
             count++;
         }
@@ -151,7 +169,7 @@ public class Program {
 		if (dayNum == 4) return "FR";
 		if (dayNum == 5) return "SA";
 		if (dayNum == 6) return "SU";
-		Err();
+		Err("Invalid Day Week Number");
 		return null;
 	}
 
@@ -163,24 +181,34 @@ public class Program {
 		return september;
 	}
 
-//	static  public isClassDay(int dayCode, int[] week){
-//
-//	}
 	static public void checkInputDate(String day){
 		int dayCode = dayStringToCode(day);
-
 	}
+
+    static public boolean isStudentExist(String name, String[] students){
+        for (int i = 0; i < students.length; i++){
+            if(students[i] == null)
+                break;
+            if( students[i].equals(name))
+                return true;
+        }
+        return false;
+    }
+
+    static public boolean isClassExist(int dateAndHour, int[] dates){
+        for (int i = 0; i < dates.length; i++){
+            if (dates[i] == dateAndHour)
+                return true;
+        }
+        return false;
+    }
 
     static public void main(String[] args){
         Scanner sc = new Scanner(System.in);
         String[] students = studentsList(sc);
 		int[] september = generateSeptember(1);
         int[] classeOfWeek = getClassesOfWeek(sc);
-//		String[]    attNames  = new String[100];
-//		int[]       attHours  = new int[100];
-//		int[]       attDates  = new int[100];
-//		int[]       attStatus = new int[100];
-//		int attCount = getAttendence(sc, attNames, attHours, attDates, attStatus);
+		getAttendence(sc, students, classeOfWeek, september);
 		
         sc.close();
     }

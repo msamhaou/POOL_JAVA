@@ -4,6 +4,7 @@ public class User {
 	private final int		id;
 	private String	name;
 	private int		balance;
+	private TransactionsLinkedList transactionsLinkedList;
 
 	public User(){
 		id = UserIdsGenerator.getInstance().generateId();
@@ -36,6 +37,14 @@ public class User {
 
 	public int getId(){
 		return this.id;
+	}
+
+	public void addTransaction(Transaction transaction){
+		transactionsLinkedList.addTransaction(transaction);
+	}
+
+	public void removeTransaction(String uuid){
+		transactionsLinkedList.removeTransactionByUUID(uuid);
 	}
 
 	@Override
