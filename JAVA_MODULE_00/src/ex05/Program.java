@@ -16,7 +16,25 @@ public class Program {
         int packingDateandHour = hour << 8 | (DayOfWeekFromSeptember & 0xFFFF);
         return packingDateandHour;
     }
-    public static int getAttendence(Scanner sc, String[] students, int[] classesOfWeek, int[] september) {
+
+    public static int getStudentIndex(String name, String[] students){
+        for (int i = 0; i < students.length; i++){
+            if (students[i] != null && students[i].equals(name))
+                return i;
+        }
+        return -1;
+    }
+
+    public static boolean isInputExist(String line, String[] storedInputs){
+        for (int i =0 ; i < storedInputs.length; i++){
+            if (storedInputs[i] == null)
+                break;
+            if (storedInputs[i].equals(line))
+                return true;
+        }
+        return false;
+    }
+    public static int[] getAttendence(Scanner sc, String[] students, int[] classesOfWeek, int[] september) {
 
         int         counter = 0;
         String[] names = new String[100];
@@ -24,26 +42,46 @@ public class Program {
         int[] dates = new int[100];
         int[] status = new int[100];
         String      line = sc.nextLine();
+        int[] results = new int[100];
+        String[] storeInput = new String[100];
 
 
         while (!line.equals(".")){
+            if (isInputExist(line, storeInput))
+                Err("Do not repeat inputs");
             String[] spl = split(line,' ');
             if (spl.length != 4)
                 Err("Invalid Input 32");
             names[counter] = spl[0];
-            if (!isStudentExist(spl[0], students))
-                Err("Student Dont exist");
+            int studentIndex = getStudentIndex(names[counter], students);
+            if (studentIndex == -1)
+                Err("Student Do not exist");
 			hours[counter] = _parseInt(spl[1]);
 			dates[counter] = _parseInt((spl[2]));
             int packInputedClass = packDayAndHour(hours[counter], dates[counter], september);
             if (!isClassExist(packInputedClass, classesOfWeek))
                 Err("Class Does not Exist");
 			status[counter] = decodeStatus(spl[3]);
+            results[counter++] = (studentIndex << 24 & 0xFF) | (status[counter] << 16 & 0xFF) |  (september[dates[counter] - 1] << 8 & 0xFF) | (hours[counter] & 0xFF);
+            storeInput[counter] = line;
 			//Hours (1,6) && name in names && dates in dates
             line = sc.nextLine();
-			counter++;
         }
-		return counter;
+		return results;
+    }
+
+    static  public boolean isAlphabet(char c){
+        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+    }
+
+    static public boolean isAllAlphabet(String name){
+        char[] nameToChar = name.toCharArray();
+
+        for (int i = 0; i < nameToChar.length; i++){
+            if (!isAlphabet(nameToChar[i]))
+                return false;
+        }
+        return true;
     }
 
     static public String[] studentsList(Scanner sc){
@@ -51,10 +89,14 @@ public class Program {
         System.out.print("-> ");
         String line = sc.nextLine();
         int i =0;
-        while(!line.equals(".") && i < 10){
+        while(!line.equals(".") ){
+            if (i >= 10)
+                Err("Invalid Input: More than 10 students");
             studens[i++] = line;
+            if (!isAllAlphabet(line))
+                Err("Invalid input: Student Name");
             if(line.isEmpty() || line.length() > 10 || line.contains(" "))
-                Err("Len");
+                Err("Len > 10");
             System.out.print("-> ");
             line = sc.nextLine();
         }
@@ -133,7 +175,9 @@ public class Program {
         int count = 0;
         System.out.print("-> ");
         String line = sc.nextLine();
-        while (!line.equals(".") && count < 10){
+        while (!line.equals(".") ){
+            if (count >= 10)
+                Err("Invalid Input: More than 10 Classes inserted");
             String[] spl = split(line, ' ');//spl < 2
             if (spl.length == 0 || spl.length > 2)
                 Err("Invalid Date Input");
@@ -208,7 +252,7 @@ public class Program {
         String[] students = studentsList(sc);
 		int[] september = generateSeptember(1);
         int[] classeOfWeek = getClassesOfWeek(sc);
-		getAttendence(sc, students, classeOfWeek, september);
+		int[] attendeceArray = getAttendence(sc, students, classeOfWeek, september);
 		
         sc.close();
     }
