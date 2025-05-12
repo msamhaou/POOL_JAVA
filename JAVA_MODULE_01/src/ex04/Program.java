@@ -3,34 +3,28 @@ package ex04;
 import java.util.Scanner;
 
 public class Program {
-	static public TransactionsLinkedList initTransactionLinkedList(){
-		TransactionsLinkedList list = new TransactionsLinkedList();
-		for (int i = 0; i < 20; i++){
-			Transaction transaction = new Transaction();
-			transaction.setSender(new User("S"+i));
-			transaction.setRecipient(new User("R"+i));
-			transaction.setAmount(500 + i);
-			list.addTransaction(transaction);
-		}
-		return list;
-	}
-
-	public static void transactionsLinkedListIterator(TransactionsLinkedList transactionsLinkedList){
-		for
-		(TransactionsLinkedList.Node node = transactionsLinkedList.head;
-				node != null;
-				node = node.next
-		)
-		{
-			System.out.println(node.data);
-		}
+	private static void Test(){
+		assert 1 == 1;
 	}
 
 	public static void main(String[] args) {
-		TransactionsLinkedList transactionsLinkedList = initTransactionLinkedList();
-		transactionsLinkedListIterator(transactionsLinkedList);
-		String uuid = transactionsLinkedList.toArray()[9].getId();
-		transactionsLinkedList.removeTransactionByUUID(uuid);
-		transactionsLinkedListIterator(transactionsLinkedList);
+		User firstUser = new User("taha");
+		firstUser.setBalance(500);
+
+		User secondUser = new User("yas");
+		secondUser.setBalance(900);
+
+		TransactionsService transactionsService = new TransactionsService();
+		transactionsService.addUserToService(firstUser);
+		transactionsService.addUserToService(secondUser);
+
+		transactionsService.performTransfer(firstUser.getId(), secondUser.getId(), 200);
+		System.out.println(transactionsService.getUserBalance(firstUser.getId()));
+
+		transactionsService.performTransfer(firstUser.getId(), secondUser.getId(), 200);
+		System.out.println(transactionsService.getUserBalance(firstUser.getId()));
+
+		transactionsService.removeUserIdTransaction(firstUser.getId(), firstUser.getTransactionArray()[0].getUuid());
+		System.out.println(transactionsService.checkValidity().length);
 	}
 }

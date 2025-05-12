@@ -7,11 +7,21 @@ public class Transaction {
 		OUTCOME,
 		INCOME
 	}
-	private String id = UUID.randomUUID().toString();
+	private String uuid;
 	private User Recipient;
 	private User Sender;
 	private Category category;
 	private int amount;
+
+	Transaction(){
+		this.uuid = UUID.randomUUID().toString();
+	}
+	Transaction(User sender, User recipient, Category category){
+		this.uuid = UUID.randomUUID().toString();
+		this.Sender = sender;
+		this.Recipient = recipient;
+		this.category = category;
+	}
 
 	public void setSender(User sender){
 		this.Sender = sender;
@@ -47,17 +57,17 @@ public class Transaction {
 		return this.amount;
 	}
 
-	public void setId(String uuid){
-		this.id = uuid;
+	public void setUuid(String uuid){
+		this.uuid = uuid;
 	}
-	public String getId(){
-		return id;
+	public String getUuid(){
+		return uuid;
 	}
 
 	@Override
 	public String toString(){
 		return "Transaction{" +
-				"id='" + id + '\'' +
+				"id='" + uuid + '\'' +
 				", sender=" + Sender.getName() +
 				", recipient=" + Recipient.getName() +
 				", category=" + category +

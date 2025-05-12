@@ -40,16 +40,16 @@ public class TransactionsLinkedList implements TransactionsList {
 	}
 
 	@Override
-	public void removeTransactionByUUID(String uuid) {
+	public Transaction removeTransactionByUUID(String uuid) {
 		if (head == null)
 			throw new TransactionNotFoundException("Transaction ID:"+uuid +" Not found");
 		Node node = head;
 		Node back = null;
 
 		while (node!= null){
-			if (node.data.getId().equals(uuid)){
+			if (node.data.getUuid().equals(uuid)){
 				removeNode(back, node);
-				return;
+				return node.data;
 			}
 			back = node;
 			node = node.next;

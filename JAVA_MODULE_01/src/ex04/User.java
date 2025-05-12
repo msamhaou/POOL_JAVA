@@ -8,11 +8,13 @@ public class User {
 
 	public User(){
 		id = UserIdsGenerator.getInstance().generateId();
+		this.transactionsLinkedList = new TransactionsLinkedList();
 	}
 
 	public User(String name) {
 		this.name = name;
 		id = UserIdsGenerator.getInstance().generateId();
+		this.transactionsLinkedList = new TransactionsLinkedList();
 	}
 	private void printErr(String err){
 		System.err.println(err);
@@ -24,7 +26,7 @@ public class User {
 	}
 
 	public void setBalance(int balance){
-		this.balance += balance;
+		this.balance = balance;
 	}
 
 	public void setName(String name){
@@ -43,8 +45,12 @@ public class User {
 		transactionsLinkedList.addTransaction(transaction);
 	}
 
-	public void removeTransaction(String uuid){
-		transactionsLinkedList.removeTransactionByUUID(uuid);
+	public Transaction removeTransaction(String uuid){
+		return transactionsLinkedList.removeTransactionByUUID(uuid);
+	}
+
+	public Transaction[] getTransactionArray(){
+		return transactionsLinkedList.toArray();
 	}
 
 	@Override
