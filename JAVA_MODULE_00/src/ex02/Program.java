@@ -47,7 +47,7 @@ public class Program {
         while (true){
             System.out.print("-> ");
             if (!sc.hasNextInt()){
-                System.err.println("IllegalArguments");
+                System.err.println("IllegalArgument");
                 System.exit(-1);
             }
             num = sc.nextInt();
@@ -57,7 +57,7 @@ public class Program {
             int s = sum(num);
             res += isPrime(s);
         }
-        System.out.printf("Count of coffee-request : %d", res);
+        System.out.printf("Count of coffee-request - %d", res);
 
     }
 }

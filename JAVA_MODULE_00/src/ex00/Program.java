@@ -9,7 +9,7 @@ public class Program {
         return res;
     }
     public static void main(String[] args){
-        int digists = 12901212;
+        int digists = 123456;
         int res = sum(digists);
         System.out.println(res);
     }

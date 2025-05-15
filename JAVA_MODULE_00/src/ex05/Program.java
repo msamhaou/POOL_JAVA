@@ -13,8 +13,7 @@ public class Program {
 
     public static int packDayAndHour(int hour, int date, int[] september){
         int DayOfWeekFromSeptember = september[date - 1];
-        int packingDateandHour = hour << 8 | (DayOfWeekFromSeptember & 0xFFFF);
-        return packingDateandHour;
+        return DayOfWeekFromSeptember << 16 | (hour & 0xFFFF);
     }
 
     public static int getStudentIndex(String name, String[] students){
@@ -41,10 +40,11 @@ public class Program {
         int[] hours = new int[100];
         int[] dates = new int[100];
         int[] status = new int[100];
-        String      line = sc.nextLine();
         int[] results = new int[100];
         String[] storeInput = new String[100];
 
+        System.out.print("-> ");
+        String      line = sc.nextLine();
 
         while (!line.equals(".")){
             if (isInputExist(line, storeInput))
@@ -66,9 +66,48 @@ public class Program {
             storeInput[counter] = line;
             counter++;
 			//Hours (1,6) && name in names && dates in dates
+            System.out.print("-> ");
             line = sc.nextLine();
         }
 		return results;
+    }
+
+    public static int[][] studentAttendence(Scanner sc, String[] students, int[] classesOfWeek, int[] september) {
+        int counter = 0;
+        int[][] studentsData = new int[10][30*6];
+        String[] storeInput = new String[100];
+        int[] hours = new int[100];
+        int[] dates = new int[100];
+        int[] status = new int[100];
+        int[] results = new int[100];
+        String[] names = new String[100];
+        int[] indexCount = new int[10];
+        System.out.print("-> ");
+        String      line = sc.nextLine();
+
+        while (!line.equals(".")) {
+            if (isInputExist(line, storeInput))
+                Err("Do not repeat inputs");
+            String[] spl = split(line,' ');
+            if (spl.length != 4)
+                Err("Invalid Input 32");
+            names[counter] = spl[0];
+            int studentIndex = getStudentIndex(names[counter], students);
+            if (studentIndex == -1)
+                Err("Student Do not exist");
+            hours[counter] = _parseInt(spl[1]);
+            dates[counter] = _parseInt((spl[2]));
+            int packInputedClass = packDayAndHour(hours[counter], dates[counter], september);
+            if (!isClassExist(packInputedClass, classesOfWeek))
+                Err("Class Does not Exist");
+            status[counter] = decodeStatus(spl[3]);
+            System.out.println("d:" + (dates[counter] - 1) + ", h:" + hours[counter]);
+            studentsData[studentIndex][6 * (dates[counter] - 1) + hours[counter]] = status[counter];
+            indexCount[studentIndex]++;
+            System.out.print("-> ");
+            line = sc.nextLine();
+        }
+        return studentsData;
     }
 
     static  public boolean isAlphabet(char c){
@@ -182,7 +221,7 @@ public class Program {
             if (count >= 10)
                 Err("Invalid Input: More than 10 Classes inserted");
             String[] spl = split(line, ' ');//spl < 2
-            if (spl.length == 0 || spl.length > 2)
+            if ( spl.length != 2)
                 Err("Invalid Date Input");
             hours[count] = _parseInt(spl[0]);
             if (hours[count] < 1 || hours[count] > 6 )
@@ -190,12 +229,16 @@ public class Program {
             days[count] = dayStringToCode(spl[1]);
             if (days[count] == -1)
                 Err("Invalid Week Day");
-			results[count] = hours[count] << 8 | (days[count]& 0xFFFF);
+			results[count] = days[count] << 16 | (hours[count]& 0xFFFF);
             System.out.print("-> ");
             line = sc.nextLine();
             count++;
         }
-		return results;
+        int[] finalResult = new int[count];
+        for (int i = 0; i < count; i++){
+            finalResult[i] = results[i];
+        }
+		return finalResult;
     }
 
 	public static int dayStringToCode(String d) {
@@ -250,23 +293,86 @@ public class Program {
         return false;
     }
 
+    static public int isDayClassExist(int[] classesWeek, int entredDay){
+        for (int i = 0; i < classesWeek.length; i++){
+            if (classesWeek[i] == 0)
+                continue;
+            if ((classesWeek[i] >> 16) == entredDay)
+                return i;
+        }
+        return -1;
+    }
+
+    static private void insertionSort(int arr[], int n){
+        for (int i = 1; i < n; ++i){
+            int key = arr[i];
+            int j = i - 1;
+            while (j >= 0 && arr[j] > key){
+                arr[j + 1] = arr[j];
+                j--;
+            }
+            arr[j + 1] = key;
+        }
+    }
+
+    static public void sortClasses(int[] classesOfWeek){
+        insertionSort(classesOfWeek, classesOfWeek.length);
+    }
+
+    static private void debugArr(int[] arr){
+        for (int i = 0 ;i < arr.length; i++){
+            if (arr[i] > 0)
+                System.out.println(decodeDay((arr[i] >> 16)) + " " + (arr[i] & 0xFFFF));
+        }
+    }
+
+    static public int[] createCopy(int[] arr, int length){
+        int[] copy = new int[length];
+        for (int i = 0; i < length; i++){
+            copy[i] = arr[i];
+        }
+        return copy;
+    }
     static public void main(String[] args){
         Scanner sc = new Scanner(System.in);
         String[] students = studentsList(sc);
 		int[] september = generateSeptember(1);
         int[] classeOfWeek = getClassesOfWeek(sc);
-		int[] attendeceArray = getAttendence(sc, students, classeOfWeek, september);
+        sortClasses(classeOfWeek);
+		int[][] attendeceArray = studentAttendence(sc, students, classeOfWeek, september);
 
-        for (int i = 0; i < attendeceArray.length; i++){
-            if (attendeceArray[i] == 0 )
-                break;
-            System.out.println(Integer.toBinaryString(attendeceArray[i]));
-            int studentIndex = (attendeceArray[i] >> 8 * 3) & 0xFF;
-            int status = (attendeceArray[i] >> 8 * 2) & 0xFF;
-            int day = (attendeceArray[i] >> 8) & 0xFF;
-            int hour = attendeceArray[i] & 0xFF;
-            System.out.println(students[studentIndex] + " "  + status + " " + day + " " + hour);
+        /// *************** ///
+        System.out.print("            ");
+        for (int i = 0; i < 30; i++){
+            int j = isDayClassExist(classeOfWeek, september[i]);
+            while (j != -1&& j < classeOfWeek.length && (classeOfWeek[j] >> 16) == september[i]){
+                System.out.print((classeOfWeek[j] & 0xFFFF) + ":00 " + decodeDay(classeOfWeek[j] >> 16) + " " + (i + 1) + " | ");
+                j++;
+            }
+
         }
+        System.out.println("");
+        /// *************** ///
+        for (int i = 0; i < attendeceArray.length; i++){
+            int[] studentData = attendeceArray[i];
+            if (students[i] == null)
+                break;
+            System.out.print(students[i] + "      |");
+            for (int j = 0; j < 30; j++){
+                for (int k = 0; k < 6; k++){
+                    if (isClassExist(packDayAndHour(k , j + 1, september), classeOfWeek)){
+                        if (studentData[(j * 6)+k] != 0){
+                            System.out.print("          "+studentData[(j * 6)+ k]+"|");
+                        }
+                        else
+                            System.out.print("           |");
+                    }
+
+                }
+            }
+            System.out.println("");
+        }
+
 
 		
         sc.close();

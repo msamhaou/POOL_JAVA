@@ -11,7 +11,7 @@ public class Program {
             arr[letterIndex] |= ((long)letterIndex << 32);
             arr[letterIndex]++;
             if ((arr[letterIndex] & 0xFFFF) > 999){
-                System.err.print("IllegalArguments\n");
+                System.err.print("IllegalArgument\n");
                 System.exit(-1);
             }
 
